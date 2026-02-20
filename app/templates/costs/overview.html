@@ -1,0 +1,131 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Cost Overview - Cloud Pro{% endblock %}
+{% block page_title %}Cost Overview{% endblock %}
+
+{% block content %}
+<!-- Total Cost Card -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Current Month Total</div>
+        <div class="metric-value">${{ "%.2f"|format(total_cost or 0) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Daily Average</div>
+        <div class="metric-value">${{ "%.2f"|format(daily_average or 0) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Projected Month-End</div>
+        <div class="metric-value warning">${{ "%.2f"|format(projected_cost or 0) }}</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid-2 mb-6">
+    <div class="card">
+        <div class="card-header">Daily Cost Trend</div>
+        <div class="card-body">
+            <canvas id="dailyCostChart" height="280"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Cost by Service</div>
+        <div class="card-body">
+            <canvas id="serviceCostChart" height="280"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch daily cost data
+    fetch('/api/costs/daily')
+        .then(r => r.json())
+        .then(data => {
+            const labels = data.map(d => d.date || d.day);
+            const values = data.map(d => d.cost || d.total || 0);
+
+            new Chart(document.getElementById('dailyCostChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Daily Cost ($)',
+                        data: values,
+                        backgroundColor: '#f97316',
+                        borderRadius: 4,
+                        barThickness: 'flex',
+                        maxBarThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return '$' + value; }
+                            },
+                            grid: { color: '#f5f5f4' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxRotation: 45 }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            document.getElementById('dailyCostChart').parentElement.innerHTML =
+                '<div style="text-align:center;padding:40px;color:var(--text-secondary);">Unable to load daily cost data.</div>';
+        });
+
+    // Fetch cost by service data
+    fetch('/api/costs/by-service')
+        .then(r => r.json())
+        .then(data => {
+            const labels = data.map(d => d.service || d.name || 'Unknown');
+            const values = data.map(d => d.cost || d.total || 0);
+            const colors = [
+                '#f97316', '#ea580c', '#3b82f6', '#22c55e', '#f59e0b',
+                '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#ef4444'
+            ];
+
+            new Chart(document.getElementById('serviceCostChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 16, usePointStyle: true }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            document.getElementById('serviceCostChart').parentElement.innerHTML =
+                '<div style="text-align:center;padding:40px;color:var(--text-secondary);">Unable to load service cost data.</div>';
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Budgets - Cloud Pro{% endblock %}
+{% block page_title %}Budgets{% endblock %}
+
+{% block topbar_actions %}
+<a href="/budgets/new" class="btn btn-primary btn-sm">+ New Budget</a>
+{% endblock %}
+
+{% block content %}
+{% if budgets and budgets|length > 0 %}
+<div class="grid-3">
+    {% for budget in budgets %}
+    {% set pct = ((budget.current_spend or 0) / budget.monthly_limit * 100) if budget.monthly_limit and budget.monthly_limit > 0 else 0 %}
+    <div class="card">
+        <div class="card-body">
+            <div style="margin-bottom: 14px;">
+                <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">{{ budget.name }}</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">
+                    Monthly limit: ${{ "%.2f"|format(budget.monthly_limit or 0) }}
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                <span style="font-size: 22px; font-weight: 700; {% if pct >= 100 %}color: var(--danger);{% elif pct >= (budget.alert_threshold_percent or 80) %}color: var(--warning);{% else %}color: var(--text-primary);{% endif %}">
+                    ${{ "%.2f"|format(budget.current_spend or 0) }}
+                </span>
+                <span style="font-size: 13px; color: var(--text-secondary);">{{ "%.0f"|format(pct) }}%</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ [pct, 100]|min }}%; background: {% if pct >= 100 %}var(--danger){% elif pct >= (budget.alert_threshold_percent or 80) %}var(--warning){% else %}var(--success){% endif %};"></div>
+            </div>
+
+            {% if budget.alert_threshold_percent %}
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                Alert at {{ budget.alert_threshold_percent }}% (${{ "%.0f"|format(budget.monthly_limit * budget.alert_threshold_percent / 100) }})
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <div class="empty-icon">&#128202;</div>
+            <h3>No Budgets Set</h3>
+            <p>Create a budget to track spending and get alerts when thresholds are exceeded.</p>
+            <a href="/budgets/new" class="btn btn-primary btn-lg">Create Your First Budget</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

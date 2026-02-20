@@ -1,0 +1,111 @@
+{% extends "layout/base.html" %}
+
+{% block title %}AI Advisor - Cloud Pro{% endblock %}
+{% block page_title %}AI Advisor{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+    <!-- Query Panel -->
+    <div class="card">
+        <div class="card-header">Ask Your Cloud Advisor</div>
+        <div class="card-body">
+            <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
+                Ask natural language questions about your cloud infrastructure, costs, and optimization opportunities.
+            </p>
+
+            <div class="form-group">
+                <label for="advisor-query">Your Question</label>
+                <textarea id="advisor-query" class="form-control" rows="4"
+                          placeholder="e.g. What's my most expensive service? Which resources are idle? How can I reduce my monthly bill?"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button type="button" class="btn btn-secondary btn-sm suggestion-btn" data-query="What's my most expensive service?">Most expensive service?</button>
+                <button type="button" class="btn btn-secondary btn-sm suggestion-btn" data-query="Which resources are idle?">Idle resources?</button>
+                <button type="button" class="btn btn-secondary btn-sm suggestion-btn" data-query="How can I reduce my monthly bill?">Reduce my bill?</button>
+                <button type="button" class="btn btn-secondary btn-sm suggestion-btn" data-query="Show me cost trends for the last 30 days">Cost trends?</button>
+            </div>
+
+            <button id="submit-query" class="btn btn-primary">
+                Ask Advisor
+            </button>
+        </div>
+    </div>
+
+    <!-- Response Panel -->
+    <div class="card">
+        <div class="card-header">Advisor Response</div>
+        <div class="card-body">
+            <div id="advisor-response">
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+                    <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.4;">&#10024;</div>
+                    <p>Ask a question to get AI-powered insights about your cloud infrastructure.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const queryInput = document.getElementById('advisor-query');
+    const submitBtn = document.getElementById('submit-query');
+    const responseArea = document.getElementById('advisor-response');
+
+    // Suggestion buttons
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            queryInput.value = this.dataset.query;
+            queryInput.focus();
+        });
+    });
+
+    submitBtn.addEventListener('click', async function() {
+        const query = queryInput.value.trim();
+        if (!query) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Thinking...';
+        responseArea.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);">Analyzing your cloud infrastructure...</div>';
+
+        try {
+            const response = await fetch('/api/advisor/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.response) {
+                // Format the response with basic markdown-like rendering
+                const formatted = data.response
+                    .replace(/\n\n/g, '</p><p style="margin-bottom:12px;">')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code style="background:#fafaf9;padding:2px 6px;border-radius:4px;font-size:13px;">$1</code>');
+
+                responseArea.innerHTML = '<div style="font-size:14px;line-height:1.7;"><p style="margin-bottom:12px;">' + formatted + '</p></div>';
+            } else {
+                responseArea.innerHTML = '<div class="alert-box danger">' + (data.error || data.detail || 'Unable to process your query. Please try again.') + '</div>';
+            }
+        } catch (err) {
+            responseArea.innerHTML = '<div class="alert-box danger">Connection error. Please check your network and try again.</div>';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Ask Advisor';
+        }
+    });
+
+    // Submit on Ctrl+Enter
+    queryInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            submitBtn.click();
+        }
+    });
+});
+</script>
+{% endblock %}

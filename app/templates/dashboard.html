@@ -1,0 +1,132 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Dashboard - Cloud Pro{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Metric Cards -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Total Monthly Spend</div>
+        <div class="metric-value">${{ "%.2f"|format(total_spend or 0) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Active Alerts</div>
+        <div class="metric-value {% if (alert_count or 0) > 0 %}danger{% endif %}">{{ alert_count or 0 }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Total Resources</div>
+        <div class="metric-value">{{ resource_count or 0 }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Budget Status</div>
+        <div class="metric-value {% if budget_limit and total_spend and total_spend > budget_limit %}danger{% elif budget_limit and total_spend and total_spend > budget_limit * 0.8 %}warning{% else %}success{% endif %}">
+            {% if budget_limit %}
+                ${{ "%.0f"|format(total_spend or 0) }} / ${{ "%.0f"|format(budget_limit) }}
+            {% else %}
+                No budget set
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if not accounts or accounts|length == 0 %}
+<!-- Empty State -->
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <div class="empty-icon">&#9729;</div>
+            <h3>Welcome to Cloud Pro!</h3>
+            <p>Connect your first cloud account to start tracking resources, costs, and waste.</p>
+            <a href="/accounts/new" class="btn btn-primary btn-lg">Connect Cloud Account</a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Cost by Service Chart -->
+<div class="grid-2 mb-6">
+    <div class="card">
+        <div class="card-header">Cost by Service</div>
+        <div class="card-body">
+            <canvas id="serviceCostChart" height="260"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Recent Waste Alerts</div>
+        <div class="card-body">
+            {% if waste_alerts and waste_alerts|length > 0 %}
+                {% for alert in waste_alerts[:5] %}
+                <div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; {% if not loop.last %}border-bottom: 1px solid var(--border);{% endif %}">
+                    <span class="badge {% if alert.severity == 'critical' %}badge-danger-dark{% elif alert.severity == 'high' %}badge-danger{% elif alert.severity == 'medium' %}badge-warning{% else %}badge-info{% endif %}">
+                        {{ alert.severity|default('medium') }}
+                    </span>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 14px; font-weight: 500;">{{ alert.title }}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                            Est. waste: <span class="text-danger">${{ "%.2f"|format(alert.estimated_monthly_waste or 0) }}/mo</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 24px; color: var(--text-secondary);">
+                    <p>No waste alerts detected. Your infrastructure looks efficient.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if accounts and accounts|length > 0 and cost_by_service %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceData = {{ cost_by_service|tojson }};
+    const labels = serviceData.map(d => d.service || d.name || 'Unknown');
+    const values = serviceData.map(d => d.cost || d.total || 0);
+    const colors = [
+        '#f97316', '#ea580c', '#c2410c', '#fb923c', '#fdba74',
+        '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'
+    ];
+
+    new Chart(document.getElementById('serviceCostChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Monthly Cost ($)',
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderRadius: 4,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return '$' + value; }
+                    },
+                    grid: { color: '#f5f5f4' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Waste Detection - Cloud Pro{% endblock %}
+{% block page_title %}Waste Detection{% endblock %}
+
+{% block content %}
+<!-- Summary -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Open Alerts</div>
+        <div class="metric-value {% if (open_count or 0) > 0 %}danger{% endif %}">{{ open_count or 0 }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Estimated Monthly Waste</div>
+        <div class="metric-value danger">${{ "%.2f"|format(total_waste or 0) }}</div>
+    </div>
+</div>
+
+<!-- Waste Alert Cards -->
+{% if alerts and alerts|length > 0 %}
+    {% for alert in alerts %}
+    <div class="card mb-4">
+        <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {% if alert.severity == 'critical' %}
+                    <span class="badge badge-danger-dark">critical</span>
+                {% elif alert.severity == 'high' %}
+                    <span class="badge badge-danger">high</span>
+                {% elif alert.severity == 'medium' %}
+                    <span class="badge badge-warning">medium</span>
+                {% else %}
+                    <span class="badge badge-info">{{ alert.severity|default('low') }}</span>
+                {% endif %}
+                <span>{{ alert.title }}</span>
+            </div>
+            {% if alert.status == 'open' %}
+            <div style="display: flex; gap: 8px;">
+                <form action="/waste/{{ alert.id }}/resolve" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-success btn-sm">Resolve</button>
+                </form>
+                <form action="/waste/{{ alert.id }}/dismiss" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary btn-sm">Dismiss</button>
+                </form>
+            </div>
+            {% else %}
+            <span class="badge badge-gray">{{ alert.status }}</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 12px; color: var(--text-primary); font-size: 14px;">{{ alert.description }}</p>
+
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div style="font-size: 14px;">
+                    <span style="color: var(--text-secondary);">Estimated waste:</span>
+                    <span class="text-danger" style="font-weight: 600;">${{ "%.2f"|format(alert.estimated_monthly_waste or 0) }}/mo</span>
+                </div>
+                {% if alert.resource %}
+                <div style="font-size: 14px;">
+                    <span style="color: var(--text-secondary);">Resource:</span>
+                    <span style="font-weight: 500;">{{ alert.resource.name }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if alert.recommendation %}
+            <div class="alert-box info mt-4">
+                <strong>Recommendation:</strong> {{ alert.recommendation }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <div class="empty-icon">&#9888;</div>
+            <h3>No Waste Detected</h3>
+            <p>Cloud Pro continuously monitors your resources for idle, oversized, or unused infrastructure. All clear for now.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

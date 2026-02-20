@@ -1,0 +1,93 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{{ resource.name }} - Cloud Pro{% endblock %}
+{% block page_title %}Resource Detail{% endblock %}
+
+{% block topbar_actions %}
+<a href="/resources" class="btn btn-secondary btn-sm">Back to Resources</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-6">
+    <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <span>{{ resource.name }}</span>
+        {% if resource.status == 'running' or resource.status == 'connected' %}
+            <span class="badge badge-success">{{ resource.status }}</span>
+        {% elif resource.status == 'stopped' %}
+            <span class="badge badge-gray">{{ resource.status }}</span>
+        {% elif resource.status == 'error' %}
+            <span class="badge badge-danger">{{ resource.status }}</span>
+        {% elif resource.status == 'idle' or resource.status == 'warning' %}
+            <span class="badge badge-warning">{{ resource.status }}</span>
+        {% elif resource.status == 'critical' %}
+            <span class="badge badge-danger-dark">{{ resource.status }}</span>
+        {% else %}
+            <span class="badge badge-gray">{{ resource.status|default('unknown') }}</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="grid-2">
+            <div>
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-secondary); padding: 10px 16px 10px 0; width: 140px; border-bottom: 1px solid var(--border);">Name</td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid var(--border);">{{ resource.name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-secondary); padding: 10px 16px 10px 0; border-bottom: 1px solid var(--border);">Type</td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+                                <span class="badge badge-primary">{{ resource.resource_type }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-secondary); padding: 10px 16px 10px 0; border-bottom: 1px solid var(--border);">Account</td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid var(--border);">{{ account.name }} ({{ account.provider|upper }})</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-secondary); padding: 10px 16px 10px 0; border-bottom: 1px solid var(--border);">Region</td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid var(--border);">{{ resource.region|default('--') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-secondary); padding: 10px 16px 10px 0;">Status</td>
+                            <td style="padding: 10px 0;">{{ resource.status|default('unknown') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                {% if resource.config %}
+                <div class="card">
+                    <div class="card-header">Configuration</div>
+                    <div class="card-body">
+                        <pre style="background: #fafaf9; padding: 12px; border-radius: 6px; font-size: 13px; overflow-x: auto; white-space: pre-wrap; word-break: break-word;" class="font-mono">{{ resource.config if resource.config is string else resource.config|tojson(indent=2) }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if resource.tags %}
+                <div class="card mt-4">
+                    <div class="card-header">Tags</div>
+                    <div class="card-body">
+                        <div class="flex flex-wrap gap-2">
+                            {% if resource.tags is mapping %}
+                                {% for key, value in resource.tags.items() %}
+                                    <span class="badge badge-gray">{{ key }}: {{ value }}</span>
+                                {% endfor %}
+                            {% elif resource.tags is iterable and resource.tags is not string %}
+                                {% for tag in resource.tags %}
+                                    <span class="badge badge-gray">{{ tag }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="badge badge-gray">{{ resource.tags }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

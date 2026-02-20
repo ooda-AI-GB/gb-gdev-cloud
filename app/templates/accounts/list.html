@@ -1,0 +1,59 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Cloud Accounts - Cloud Pro{% endblock %}
+{% block page_title %}Cloud Accounts{% endblock %}
+
+{% block topbar_actions %}
+<a href="/accounts/new" class="btn btn-primary btn-sm">+ Connect Account</a>
+{% endblock %}
+
+{% block content %}
+{% if accounts and accounts|length > 0 %}
+<div class="grid-3">
+    {% for account in accounts %}
+    <div class="card">
+        <div class="card-body">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: {% if account.provider == 'gcp' %}#4285f4{% elif account.provider == 'aws' %}#ff9900{% elif account.provider == 'azure' %}#0078d4{% else %}var(--primary){% endif %}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
+                        {% if account.provider == 'gcp' %}GCP{% elif account.provider == 'aws' %}AWS{% elif account.provider == 'azure' %}AZ{% else %}{{ account.provider[:3]|upper }}{% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 15px;">{{ account.name }}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);" class="font-mono">{{ account.account_id }}</div>
+                    </div>
+                </div>
+                {% if account.status == 'connected' %}
+                    <span class="badge badge-success">connected</span>
+                {% elif account.status == 'error' %}
+                    <span class="badge badge-danger">error</span>
+                {% else %}
+                    <span class="badge badge-gray">{{ account.status|default('pending') }}</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">
+                    {{ account.resources|length }} resource{{ 's' if (account.resources|length) != 1 else '' }}
+                </span>
+                {% if account.region %}
+                <span style="font-size: 13px; color: var(--text-secondary);">{{ account.region }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <div class="empty-icon">&#9729;</div>
+            <h3>No Cloud Accounts Connected</h3>
+            <p>Connect your GCP, AWS, or Azure account to start monitoring resources and costs.</p>
+            <a href="/accounts/new" class="btn btn-primary btn-lg">Connect Your First Account</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

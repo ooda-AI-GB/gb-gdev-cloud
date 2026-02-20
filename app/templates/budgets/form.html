@@ -1,0 +1,52 @@
+{% extends "layout/base.html" %}
+
+{% block title %}New Budget - Cloud Pro{% endblock %}
+{% block page_title %}Create Budget{% endblock %}
+
+{% block topbar_actions %}
+<a href="/budgets" class="btn btn-secondary btn-sm">Back to Budgets</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 560px;">
+    <div class="card">
+        <div class="card-header">Budget Details</div>
+        <div class="card-body">
+            <form action="/budgets/new" method="post">
+                <div class="form-group">
+                    <label for="name">Budget Name</label>
+                    <input type="text" id="name" name="name" class="form-control"
+                           placeholder="e.g. Production Budget, Q1 Limit" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="monthly_limit">Monthly Limit ($)</label>
+                    <input type="number" id="monthly_limit" name="monthly_limit" class="form-control"
+                           placeholder="e.g. 500" min="1" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="alert_threshold_percent">Alert Threshold (%)</label>
+                    <input type="number" id="alert_threshold_percent" name="alert_threshold_percent" class="form-control"
+                           placeholder="e.g. 80" min="1" max="100" value="80">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                        You'll be notified when spending reaches this percentage of the limit.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="period_start">Period Start Date</label>
+                    <input type="date" id="period_start" name="period_start" class="form-control">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                        Defaults to the 1st of the current month if not specified.
+                    </div>
+                </div>
+
+                <div style="padding-top: 8px;">
+                    <button type="submit" class="btn btn-primary">Create Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

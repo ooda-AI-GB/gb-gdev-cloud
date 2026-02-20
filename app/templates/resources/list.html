@@ -1,0 +1,64 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Resources - Cloud Pro{% endblock %}
+{% block page_title %}Resources{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        {% if resources and resources|length > 0 %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Provider</th>
+                        <th>Region</th>
+                        <th>Status</th>
+                        <th>Account</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resource in resources %}
+                    <tr>
+                        <td>
+                            <a href="/resources/{{ resource.id }}">{{ resource.name }}</a>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">{{ resource.resource_type }}</span>
+                        </td>
+                        <td>{{ account_map[resource.account_id].provider if resource.account_id in account_map else '--' }}</td>
+                        <td>{{ resource.region|default('--') }}</td>
+                        <td>
+                            {% if resource.status == 'running' or resource.status == 'connected' %}
+                                <span class="badge badge-success">{{ resource.status }}</span>
+                            {% elif resource.status == 'stopped' %}
+                                <span class="badge badge-gray">{{ resource.status }}</span>
+                            {% elif resource.status == 'error' %}
+                                <span class="badge badge-danger">{{ resource.status }}</span>
+                            {% elif resource.status == 'idle' or resource.status == 'warning' %}
+                                <span class="badge badge-warning">{{ resource.status }}</span>
+                            {% elif resource.status == 'critical' %}
+                                <span class="badge badge-danger-dark">{{ resource.status }}</span>
+                            {% else %}
+                                <span class="badge badge-gray">{{ resource.status|default('unknown') }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ account_map[resource.account_id].name if resource.account_id in account_map else '--' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#9874;</div>
+            <h3>No Resources Found</h3>
+            <p>Connect a cloud account to start discovering and tracking your resources.</p>
+            <a href="/accounts/new" class="btn btn-primary">Connect Account</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

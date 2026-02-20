@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, Request, status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -8,9 +9,13 @@ from typing import Any
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+
 @router.get("/pricing", response_class=HTMLResponse)
 async def pricing_page(request: Request):
-    return templates.TemplateResponse("billing/pricing.html", {"request": request, "user": None})
+    return templates.TemplateResponse(
+        "billing/pricing.html", {"request": request, "user": None}
+    )
+
 
 @router.post("/subscribe")
 async def subscribe(request: Request, user: Any = Depends(get_current_user)):
@@ -18,7 +23,12 @@ async def subscribe(request: Request, user: Any = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="Billing not configured")
 
     try:
-        url = routes_module.create_checkout(user_id=user.id, email=user.email, price_id="price_1T18q3EiGP71krhYyrOZ0Imn")
+        price_id = os.environ.get("STRIPE_PRICE_ID", "")
+        url = routes_module.create_checkout(
+            user_id=str(user.id), email=user.email, price_id=price_id
+        )
         return RedirectResponse(url=url, status_code=status.HTTP_303_SEE_OTHER)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Checkout failed: {str(e)[:200]}")
+        raise HTTPException(
+            status_code=500, detail=f"Checkout failed: {str(e)[:200]}"
+        )

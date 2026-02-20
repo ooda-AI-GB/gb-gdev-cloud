@@ -1,35 +1,86 @@
 {% extends "layout/base.html" %}
 
+{% block title %}Pricing - Cloud Pro{% endblock %}
+{% block page_title %}Pricing{% endblock %}
+
 {% block content %}
-<div class="top-bar">
-    <h1>Pricing</h1>
+<div style="text-align: center; margin-bottom: 32px;">
+    <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Choose Your Plan</h2>
+    <p style="color: var(--text-secondary); font-size: 16px;">Optimize your cloud infrastructure with AI-powered insights.</p>
 </div>
 
-<div class="pricing-grid">
-    <div class="plan-card">
-        <div class="plan-title">Free</div>
-        <div class="plan-price">$0 / month</div>
-        <ul class="features-list">
-            <li>Unlimited notes</li>
-            <li>Create, edit, delete</li>
-            <li>3 sample notes</li>
-            <li>Secure storage</li>
-        </ul>
-        <a href="/auth/login" class="btn btn-outline" style="width: 100%; display: block; text-align: center;">Get Started</a>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 780px; margin: 0 auto;">
+    <!-- Starter Plan -->
+    <div class="card" style="display: flex; flex-direction: column;">
+        <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Starter</div>
+                <div style="display: flex; align-items: baseline; gap: 4px;">
+                    <span style="font-size: 40px; font-weight: 700;">$0</span>
+                    <span style="color: var(--text-secondary);">/month</span>
+                </div>
+            </div>
+
+            <ul style="list-style: none; flex: 1; margin-bottom: 24px;">
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> 1 cloud account
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Up to 5 resources
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Basic dashboard
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> 30-day cost history
+                </li>
+            </ul>
+
+            <a href="/auth/login" class="btn btn-secondary" style="width: 100%; text-align: center;">Get Started Free</a>
+        </div>
     </div>
 
-    <div class="plan-card premium">
-        <div class="plan-title">Premium</div>
-        <div class="plan-price">$9 / month</div>
-        <ul class="features-list">
-            <li>Everything in Free</li>
-            <li>AI Summarization</li>
-            <li>AI Chat (Coming Soon)</li>
-            <li>Priority Support</li>
-        </ul>
-        <form action="/subscribe" method="post">
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Subscribe</button>
-        </form>
+    <!-- Growth Plan -->
+    <div class="card" style="display: flex; flex-direction: column; border-color: var(--primary); border-width: 2px; position: relative;">
+        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 16px; border-radius: 9999px; font-size: 12px; font-weight: 600;">RECOMMENDED</div>
+        <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Growth</div>
+                <div style="display: flex; align-items: baseline; gap: 4px;">
+                    <span style="font-size: 40px; font-weight: 700;">$79</span>
+                    <span style="color: var(--text-secondary);">/month</span>
+                </div>
+            </div>
+
+            <ul style="list-style: none; flex: 1; margin-bottom: 24px;">
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Unlimited cloud accounts
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Unlimited resources
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> AI waste detection
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> AI advisor (Gemini)
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Cost forecasting
+                </li>
+                <li style="padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--success); font-weight: 700;">&#10003;</span> Budget alerts
+                </li>
+            </ul>
+
+            <form action="/subscribe" method="post">
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Subscribe to Growth</button>
+            </form>
+        </div>
     </div>
+</div>
+
+<div style="text-align: center; margin-top: 32px; color: var(--text-secondary); font-size: 14px;">
+    <p>All plans include SSL encryption, secure authentication, and 99.9% uptime SLA.</p>
 </div>
 {% endblock %}

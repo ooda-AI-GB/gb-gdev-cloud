@@ -1,0 +1,51 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Connect Account - Cloud Pro{% endblock %}
+{% block page_title %}Connect Cloud Account{% endblock %}
+
+{% block topbar_actions %}
+<a href="/accounts" class="btn btn-secondary btn-sm">Back to Accounts</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 560px;">
+    <div class="card">
+        <div class="card-header">Account Details</div>
+        <div class="card-body">
+            <form action="/accounts/new" method="post">
+                <div class="form-group">
+                    <label for="provider">Cloud Provider</label>
+                    <select id="provider" name="provider" class="form-control" required>
+                        <option value="">Select a provider...</option>
+                        <option value="gcp">Google Cloud Platform (GCP)</option>
+                        <option value="aws">Amazon Web Services (AWS)</option>
+                        <option value="azure">Microsoft Azure</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="account_name">Account Name</label>
+                    <input type="text" id="account_name" name="account_name" class="form-control"
+                           placeholder="e.g. Production, Staging, Dev" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="account_id">Account / Project ID</label>
+                    <input type="text" id="account_id" name="account_id" class="form-control"
+                           placeholder="e.g. my-gcp-project-123" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Default Region</label>
+                    <input type="text" id="region" name="region" class="form-control"
+                           placeholder="e.g. us-central1, us-east-1, eastus">
+                </div>
+
+                <div style="padding-top: 8px;">
+                    <button type="submit" class="btn btn-primary">Connect Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
